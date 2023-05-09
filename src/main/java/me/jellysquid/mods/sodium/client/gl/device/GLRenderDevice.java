@@ -10,6 +10,7 @@ import me.jellysquid.mods.sodium.client.gl.util.EnumBitField;
 import org.lwjgl.opengl.*;
 
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 
 public class GLRenderDevice implements RenderDevice {
     private final GlStateTracker stateTracker = new GlStateTracker();
@@ -87,6 +88,20 @@ public class GLRenderDevice implements RenderDevice {
         }
 
         @Override
+        public void bufferData(GlBufferTarget target, GlMutableBuffer glBuffer, int[] intArray, GlBufferUsage usage) {
+            this.bindBuffer(target, glBuffer);
+
+            GL15C.glBufferData(target.getTargetParameter(), intArray, usage.getId());
+        }
+
+        @Override
+        public void bufferData(GlBufferTarget target, GlMutableBuffer glBuffer, IntBuffer intBuffer, GlBufferUsage usage) {
+            this.bindBuffer(target, glBuffer);
+
+            GL15C.glBufferData(target.getTargetParameter(), intBuffer, usage.getId());
+        }
+
+        @Override
         public void copyBufferSubData(GlBuffer src, GlBuffer dst, long readOffset, long writeOffset, long bytes) {
             this.bindBuffer(GlBufferTarget.COPY_READ_BUFFER, src);
             this.bindBuffer(GlBufferTarget.COPY_WRITE_BUFFER, dst);
@@ -101,6 +116,11 @@ public class GLRenderDevice implements RenderDevice {
             }
         }
 
+        @Override
+        public void bindBufferBase(GlBufferTarget target, int index, GlBuffer buffer) {
+            GL30C.glBindBufferBase(target.getTargetParameter(), index, buffer.handle());
+        }
+        
         @Override
         public void unbindVertexArray() {
             if (this.stateTracker.makeVertexArrayActive(null)) {

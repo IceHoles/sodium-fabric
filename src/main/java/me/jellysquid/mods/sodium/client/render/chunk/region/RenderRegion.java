@@ -42,6 +42,8 @@ public class RenderRegion {
 
     private final int x, y, z;
 
+    private boolean needsTranslucencyCompute = false;
+    
     public final GlBufferArena vertexBuffers;
 
 
@@ -74,6 +76,14 @@ public class RenderRegion {
 
     public int getOriginZ() {
         return this.z << REGION_LENGTH_SH << 4;
+    }
+    
+    public void setNeedsTranslucencyCompute(boolean compute) {
+        this.needsTranslucencyCompute = compute;
+    }
+
+    public boolean getNeedsTranslucencyCompute() {
+        return this.needsTranslucencyCompute;
     }
 
     public static int getChunkIndex(int x, int y, int z) {
@@ -190,6 +200,62 @@ public class RenderRegion {
             if (prev != null) {
                 prev.delete();
             }
+        }
+    }
+        public static class RenderRegionArenas {
+        public final GlBufferArena vertexBuffers;
+        public final GlBufferArena indexBuffers;
+
+        public final Map<TerrainRenderPass, GlTessellation> tessellations = new EnumMap<>(TerrainRenderPass.class);
+
+        public RenderRegionArenas(CommandList commandList, StagingBuffer stagingBuffer) {
+            int expectedVertexCount = REGION_SIZE * 756;
+            int expectedIndexCount = (expectedVertexCount / 4) * 6;
+
+            this.vertexBuffers = createArena(commandList, expectedVertexCount * ChunkModelVertexFormats.DEFAULT.getBufferVertexFormat().getStride(), stagingBuffer);
+            this.indexBuffers = createArena(commandList, expectedIndexCount * 4, stagingBuffer);
+        }
+
+        public void delete(CommandList commandList) {
+            this.deleteTessellations(commandList);
+
+            this.vertexBuffers.delete(commandList);
+            this.indexBuffers.delete(commandList);
+        }
+
+        public void deleteTessellations(CommandList commandList) {
+            for (GlTessellation tessellation : this.tessellations.values()) {
+                commandList.deleteTessellation(tessellation);
+            }
+
+            this.tessellations.clear();
+        }
+
+        public void setTessellation(TerrainRenderPass pass, GlTessellation tessellation) {
+            this.tessellations.put(pass, tessellation);
+        }
+
+        public GlTessellation getTessellation(TerrainRenderPass pass) {
+            return this.tessellations.get(pass);
+        }
+
+        public boolean isEmpty() {
+            return this.vertexBuffers.isEmpty() && this.indexBuffers.isEmpty();
+        }
+
+        public long getDeviceUsedMemory() {
+            return this.vertexBuffers.getDeviceUsedMemory() + this.indexBuffers.getDeviceUsedMemory();
+        }
+
+        public long getDeviceAllocatedMemory() {
+            return this.vertexBuffers.getDeviceAllocatedMemory() + this.indexBuffers.getDeviceAllocatedMemory();
+        }
+
+        private static GlBufferArena createArena(CommandList commandList, int initialCapacity, StagingBuffer stagingBuffer) {
+            return switch (SodiumClientMod.options().advanced.arenaMemoryAllocator) {
+                case ASYNC -> new AsyncBufferArena(commandList, initialCapacity, stagingBuffer);
+                case SWAP -> new SwapBufferArena(commandList);
+            };
         }
     }
 }
