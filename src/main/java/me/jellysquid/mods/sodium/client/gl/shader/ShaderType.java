@@ -7,7 +7,8 @@ import org.lwjgl.opengl.GL20C;
  */
 public enum ShaderType {
     VERTEX(GL20C.GL_VERTEX_SHADER),
-    FRAGMENT(GL20C.GL_FRAGMENT_SHADER);
+    FRAGMENT(GL20C.GL_FRAGMENT_SHADER),
+    COMPUTE(GL43C.GL_COMPUTE_SHADER);
 
     public final int id;
 
