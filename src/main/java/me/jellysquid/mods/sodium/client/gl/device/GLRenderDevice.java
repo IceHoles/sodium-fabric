@@ -10,6 +10,7 @@ import me.jellysquid.mods.sodium.client.gl.util.EnumBitField;
 import org.lwjgl.opengl.*;
 
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 
 public class GLRenderDevice implements RenderDevice {
     private final GlStateTracker stateTracker = new GlStateTracker();
