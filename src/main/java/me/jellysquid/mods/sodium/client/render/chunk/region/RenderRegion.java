@@ -42,6 +42,8 @@ public class RenderRegion {
 
     private final int x, y, z;
 
+    private boolean needsTranslucencyCompute = false;
+    
     public final GlBufferArena vertexBuffers;
 
 
@@ -74,6 +76,14 @@ public class RenderRegion {
 
     public int getOriginZ() {
         return this.z << REGION_LENGTH_SH << 4;
+    }
+    
+    public void setNeedsTranslucencyCompute(boolean compute) {
+        this.needsTranslucencyCompute = compute;
+    }
+
+    public boolean getNeedsTranslucencyCompute() {
+        return this.needsTranslucencyCompute;
     }
 
     public static int getChunkIndex(int x, int y, int z) {
