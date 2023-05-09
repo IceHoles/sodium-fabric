@@ -105,7 +105,7 @@ public abstract class ShaderChunkRenderer implements ChunkRenderer {
         pass.endDrawing();
     }
     
-    protected void beginCompute(BlockRenderPass pass) {
+    protected void beginCompute(TerrainRenderPass pass) {
         ChunkShaderOptions options = new ChunkShaderOptions(ChunkFogMode.SMOOTH, pass, this.vertexType);
 
         this.activeProgram = null;
