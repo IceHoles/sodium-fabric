@@ -107,7 +107,7 @@ public class RegionChunkRenderer extends ShaderChunkRenderer {
                     }
 
                     if (region.getNeedsTranslucencyCompute() && !regionSections.isEmpty()) {
-                        if (!buildDrawBatch(regionSections, pass, camera)) {
+                        if (!buildDrawBatches(regionSections, pass, camera)) {
                             continue;
                         }
                         float x = getCameraTranslation(region.getOriginX(), camera.blockX, camera.deltaX);
