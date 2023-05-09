@@ -135,7 +135,7 @@ public class RegionChunkRenderer extends ShaderChunkRenderer {
 
         ChunkShaderInterface shader = this.activeProgram.getInterface();
         shader.setProjectionMatrix(matrices.projection());
-        shader.setModelViewMatrix(matrices.modelView());
+        //shader.setModelViewMatrix(matrices.modelView());
 
         shader.setDrawUniforms(this.chunkInfoBuffer);
 
@@ -147,7 +147,7 @@ public class RegionChunkRenderer extends ShaderChunkRenderer {
                 continue;
             }
 
-            this.setModelMatrixUniforms(shader, region, camera);
+            this.setModelMatrixUniforms(shader, matrices, region, camera);
             this.executeDrawBatch(commandList, this.createTessellationForRegion(commandList, region.getArenas(), pass));
         }
         
@@ -230,7 +230,7 @@ public class RegionChunkRenderer extends ShaderChunkRenderer {
     
     private final Matrix4f cachedModelViewMatrix = new Matrix4f();
 
-    private void setModelMatrixUniforms(ChunkShaderInterface shader, RenderRegion region, ChunkCameraContext camera) {
+    private void setModelMatrixUniforms(ChunkShaderInterface shader, ChunkRenderMatrices matrices, RenderRegion region, ChunkCameraContext camera) {
         float x = getCameraTranslation(region.getOriginX(), camera.blockX, camera.deltaX);
         float y = getCameraTranslation(region.getOriginY(), camera.blockY, camera.deltaY);
         float z = getCameraTranslation(region.getOriginZ(), camera.blockZ, camera.deltaZ);
