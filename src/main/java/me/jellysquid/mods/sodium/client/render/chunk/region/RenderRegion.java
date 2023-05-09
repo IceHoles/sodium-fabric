@@ -202,4 +202,60 @@ public class RenderRegion {
             }
         }
     }
+        public static class RenderRegionArenas {
+        public final GlBufferArena vertexBuffers;
+        public final GlBufferArena indexBuffers;
+
+        public final Map<BlockRenderPass, GlTessellation> tessellations = new EnumMap<>(BlockRenderPass.class);
+
+        public RenderRegionArenas(CommandList commandList, StagingBuffer stagingBuffer) {
+            int expectedVertexCount = REGION_SIZE * 756;
+            int expectedIndexCount = (expectedVertexCount / 4) * 6;
+
+            this.vertexBuffers = createArena(commandList, expectedVertexCount * ChunkModelVertexFormats.DEFAULT.getBufferVertexFormat().getStride(), stagingBuffer);
+            this.indexBuffers = createArena(commandList, expectedIndexCount * 4, stagingBuffer);
+        }
+
+        public void delete(CommandList commandList) {
+            this.deleteTessellations(commandList);
+
+            this.vertexBuffers.delete(commandList);
+            this.indexBuffers.delete(commandList);
+        }
+
+        public void deleteTessellations(CommandList commandList) {
+            for (GlTessellation tessellation : this.tessellations.values()) {
+                commandList.deleteTessellation(tessellation);
+            }
+
+            this.tessellations.clear();
+        }
+
+        public void setTessellation(BlockRenderPass pass, GlTessellation tessellation) {
+            this.tessellations.put(pass, tessellation);
+        }
+
+        public GlTessellation getTessellation(BlockRenderPass pass) {
+            return this.tessellations.get(pass);
+        }
+
+        public boolean isEmpty() {
+            return this.vertexBuffers.isEmpty() && this.indexBuffers.isEmpty();
+        }
+
+        public long getDeviceUsedMemory() {
+            return this.vertexBuffers.getDeviceUsedMemory() + this.indexBuffers.getDeviceUsedMemory();
+        }
+
+        public long getDeviceAllocatedMemory() {
+            return this.vertexBuffers.getDeviceAllocatedMemory() + this.indexBuffers.getDeviceAllocatedMemory();
+        }
+
+        private static GlBufferArena createArena(CommandList commandList, int initialCapacity, StagingBuffer stagingBuffer) {
+            return switch (SodiumClientMod.options().advanced.arenaMemoryAllocator) {
+                case ASYNC -> new AsyncBufferArena(commandList, initialCapacity, stagingBuffer);
+                case SWAP -> new SwapBufferArena(commandList);
+            };
+        }
+    }
 }
