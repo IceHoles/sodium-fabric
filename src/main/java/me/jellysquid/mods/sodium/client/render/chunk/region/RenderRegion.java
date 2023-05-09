@@ -206,7 +206,7 @@ public class RenderRegion {
         public final GlBufferArena vertexBuffers;
         public final GlBufferArena indexBuffers;
 
-        public final Map<BlockRenderPass, GlTessellation> tessellations = new EnumMap<>(BlockRenderPass.class);
+        public final Map<TerrainRenderPass, GlTessellation> tessellations = new EnumMap<>(TerrainRenderPass.class);
 
         public RenderRegionArenas(CommandList commandList, StagingBuffer stagingBuffer) {
             int expectedVertexCount = REGION_SIZE * 756;
@@ -231,11 +231,11 @@ public class RenderRegion {
             this.tessellations.clear();
         }
 
-        public void setTessellation(BlockRenderPass pass, GlTessellation tessellation) {
+        public void setTessellation(TerrainRenderPass pass, GlTessellation tessellation) {
             this.tessellations.put(pass, tessellation);
         }
 
-        public GlTessellation getTessellation(BlockRenderPass pass) {
+        public GlTessellation getTessellation(TerrainRenderPass pass) {
             return this.tessellations.get(pass);
         }
 
