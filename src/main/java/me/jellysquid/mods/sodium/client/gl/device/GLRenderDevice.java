@@ -114,6 +114,11 @@ public class GLRenderDevice implements RenderDevice {
                 GL20C.glBindBuffer(target.getTargetParameter(), buffer.handle());
             }
         }
+        
+        @Override
+        public void bindBufferBase(GlBufferTarget target, int index, GlBuffer buffer) {
+            GL30C.glBindBufferBase(target.getTargetParameter(), index, buffer.handle());
+        }
 
         @Override
         public void unbindVertexArray() {
