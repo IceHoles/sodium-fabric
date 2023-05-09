@@ -15,6 +15,7 @@ import java.util.Map;
 
 public abstract class ShaderChunkRenderer implements ChunkRenderer {
     private final Map<ChunkShaderOptions, GlProgram<ChunkShaderInterface>> programs = new Object2ObjectOpenHashMap<>();
+    private final Map<ChunkShaderOptions, GlProgram<ComputeShaderInterface>> computes = new Object2ObjectOpenHashMap<>();
 
     protected final ChunkVertexType vertexType;
     protected final GlVertexFormat<ChunkMeshAttribute> vertexFormat;
@@ -22,11 +23,31 @@ public abstract class ShaderChunkRenderer implements ChunkRenderer {
     protected final RenderDevice device;
 
     protected GlProgram<ChunkShaderInterface> activeProgram;
-
+    protected GlProgram<ComputeShaderInterface> activeComputeProgram;
+    
     public ShaderChunkRenderer(RenderDevice device, ChunkVertexType vertexType) {
         this.device = device;
         this.vertexType = vertexType;
         this.vertexFormat = vertexType.getVertexFormat();
+    }
+
+    protected GlProgram<ComputeShaderInterface> compileComputeProgram(ChunkShaderOptions options) {
+        GlProgram<ComputeShaderInterface> compute = this.computes.get(options);
+
+        if (compute == null) {
+            GlShader shader = ShaderLoader.loadShader(ShaderType.COMPUTE,
+                    new Identifier("sodium", "blocks/block_layer_translucent_compute.glsl"), options.constants());
+
+            try {
+                this.computes.put(options,
+                        compute = GlProgram.builder(new Identifier("sodium", "chunk_shader_compute"))
+                                .attachShader(shader)
+                                .link(ComputeShaderInterface::new));
+            } finally {
+                shader.delete();
+            }
+        }
+        return compute;
     }
 
     protected GlProgram<ChunkShaderInterface> compileProgram(ChunkShaderOptions options) {
@@ -69,6 +90,7 @@ public abstract class ShaderChunkRenderer implements ChunkRenderer {
 
         ChunkShaderOptions options = new ChunkShaderOptions(ChunkFogMode.SMOOTH, pass, this.vertexType);
 
+        this.activeComputeProgram = null;
         this.activeProgram = this.compileProgram(options);
         this.activeProgram.bind();
         this.activeProgram.getInterface()
@@ -81,11 +103,29 @@ public abstract class ShaderChunkRenderer implements ChunkRenderer {
 
         pass.endDrawing();
     }
+    
+    protected void beginCompute(BlockRenderPass pass) {
+        ChunkShaderOptions options = new ChunkShaderOptions(ChunkFogMode.SMOOTH, pass, this.vertexType);
+
+        this.activeProgram = null;
+        this.activeComputeProgram = this.compileComputeProgram(options);
+        this.activeComputeProgram.bind();
+        this.activeComputeProgram.getInterface()
+                .setup(this.vertexType);
+    }
+
+    protected void endCompute() {
+        this.activeComputeProgram.unbind();
+        this.activeComputeProgram = null;
+    }
+
 
     @Override
     public void delete(CommandList commandList) {
         this.programs.values()
                 .forEach(GlProgram::delete);
+        this.computes.values().forEach(GlProgram::delete);
+        this.computes.clear();
     }
 
 }
