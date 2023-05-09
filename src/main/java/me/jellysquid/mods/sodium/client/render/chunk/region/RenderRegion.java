@@ -46,6 +46,8 @@ public class RenderRegion {
 
 
     public final Map<TerrainRenderPass, RenderRegionStorage> storage = new Reference2ReferenceOpenHashMap<>();
+    
+    private boolean needsTranslucencyCompute = false;
 
     public RenderRegion(CommandList commandList, StagingBuffer stagingBuffer, int x, int y, int z) {
         this.x = x;
@@ -76,6 +78,14 @@ public class RenderRegion {
         return this.z << REGION_LENGTH_SH << 4;
     }
 
+        public void setNeedsTranslucencyCompute(boolean compute) {
+        this.needsTranslucencyCompute = compute;
+    }
+
+    public boolean getNeedsTranslucencyCompute() {
+        return this.needsTranslucencyCompute;
+    }
+    
     public static int getChunkIndex(int x, int y, int z) {
         return x << 5 | y << 3 | z;
     }
