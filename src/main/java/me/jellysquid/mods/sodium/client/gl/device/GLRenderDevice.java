@@ -85,6 +85,20 @@ public class GLRenderDevice implements RenderDevice {
             GL20C.glBufferData(GlBufferTarget.ARRAY_BUFFER.getTargetParameter(), byteBuffer, usage.getId());
             glBuffer.setSize(byteBuffer.remaining());
         }
+        
+        @Override
+        public void bufferData(GlBufferTarget target, GlMutableBuffer glBuffer, int[] intArray, GlBufferUsage usage) {
+            this.bindBuffer(target, glBuffer);
+
+            GL15C.glBufferData(target.getTargetParameter(), intArray, usage.getId());
+        }
+
+        @Override
+        public void bufferData(GlBufferTarget target, GlMutableBuffer glBuffer, IntBuffer intBuffer, GlBufferUsage usage) {
+            this.bindBuffer(target, glBuffer);
+
+            GL15C.glBufferData(target.getTargetParameter(), intBuffer, usage.getId());
+        }
 
         @Override
         public void copyBufferSubData(GlBuffer src, GlBuffer dst, long readOffset, long writeOffset, long bytes) {
