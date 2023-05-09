@@ -227,12 +227,19 @@ public class RegionChunkRenderer extends ShaderChunkRenderer {
             drawCommandList.multiDrawElementsBaseVertex(batch.getPointerBuffer(), batch.getCountBuffer(), batch.getBaseVertexBuffer(), GlIndexType.UNSIGNED_INT);
         }
     }
+    
+    private final Matrix4f cachedModelViewMatrix = new Matrix4f();
 
     private void setModelMatrixUniforms(ChunkShaderInterface shader, RenderRegion region, ChunkCameraContext camera) {
         float x = getCameraTranslation(region.getOriginX(), camera.blockX, camera.deltaX);
         float y = getCameraTranslation(region.getOriginY(), camera.blockY, camera.deltaY);
         float z = getCameraTranslation(region.getOriginZ(), camera.blockZ, camera.deltaZ);
+        
+        Matrix4f matrix = this.cachedModelViewMatrix;
+        matrix.set(matrices.modelView());
+        matrix.translate(x, y, z);
 
+        shader.setModelViewMatrix(matrix);
         shader.setRegionOffset(x, y, z);
     }
 
