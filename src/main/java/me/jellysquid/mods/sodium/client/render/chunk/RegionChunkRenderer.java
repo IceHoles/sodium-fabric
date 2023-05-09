@@ -135,7 +135,7 @@ public class RegionChunkRenderer extends ShaderChunkRenderer {
 
         ChunkShaderInterface shader = this.activeProgram.getInterface();
         shader.setProjectionMatrix(matrices.projection());
-        //shader.setModelViewMatrix(matrices.modelView());
+        shader.setModelViewMatrix(matrices.modelView());
 
         shader.setDrawUniforms(this.chunkInfoBuffer);
 
